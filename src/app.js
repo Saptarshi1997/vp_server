@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const userRouter = require("../src/routes/user.routes");
 
 const app = express();
 
@@ -21,5 +22,7 @@ app.use(express.urlencoded({
 app.use(express.static("public"));
 
 app.use(cookieParser())
+
+app.use("/api/v1/users", userRouter);
 
 module.exports = app;
