@@ -17,7 +17,7 @@ const generateAccessAndRefreshToken = async (userId) => {
         return { accessToken, refreshToken };
 
     } catch (error) {
-        throw new errorHandler(500, "Something went wrong while generating token!")
+        return res.json(new responseHandler(400, {}, "Something went wrong when generating token!"))
     }
 }
 
@@ -35,23 +35,23 @@ const registerUser = asyncHandler(async (req, res) => {
     const { fullName, email, userName, password } = req.body;
 
     if (fullName === "" || fullName === undefined || fullName === null) {
-        throw new errorHandler(400, "Full Name is required!");
+        return res.json(new responseHandler(400, {}, "Full name is missing!"))
     } else if (email === "" || email === undefined || email === null) {
-        throw new errorHandler(400, "Email is required!");
+        return res.json(new responseHandler(400, {}, "Email is missing!"))
     } else if (userName === "" || userName === undefined || userName === null) {
-        throw new errorHandler(400, "Username is required!");
+        return res.json(new responseHandler(400, {}, "User name is missing!"))
     } else if (password === "" || password === undefined || password === null) {
-        throw new errorHandler(400, "Password is required!");
+        return res.json(new responseHandler(400, {}, "Password is missing!"))
     }
 
     const existingEmailUser = await User.findOne({ email: email });
     if (existingEmailUser) {
-        throw new errorHandler(409, `${email} already exists`);
+        return res.json(new responseHandler(400, {}, "Email already exists!"))
     }
 
     const existingUsernameUser = await User.findOne({ userName: userName });
     if (existingUsernameUser) {
-        throw new errorHandler(409, `${userName} already exists`);
+        return res.json(new responseHandler(400, {}, "User name is missing!"))
     }
 
     let avatarLocalPath;
@@ -69,10 +69,6 @@ const registerUser = asyncHandler(async (req, res) => {
     let avatar = await uploadToCloudinary(avatarLocalPath, "image");
     let coverImage = await uploadToCloudinary(coverImageLocalPath, "image");
 
-    // console.log("avatar.url", avatar.url);
-    // console.log("coverImage.url", coverImage.url);
-
-
     let user = await User.create({
         fullName,
         userName: userName.toLowerCase(),
@@ -86,14 +82,11 @@ const registerUser = asyncHandler(async (req, res) => {
         "-password -refreshToken"
     );
 
-
     if (!createdUser) {
-        throw new errorHandler(500, "Internal Server Error");
+        return res.json(new responseHandler(500, {}, "Internal server error!"))
     }
 
-    return res.status(201).json(
-        new responseHandler(200, createdUser, "User registered successfully!")
-    )
+    return res.json(new responseHandler(200, createdUser, "User registered successfully!"))
 
 })
 

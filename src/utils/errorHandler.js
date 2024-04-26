@@ -8,10 +8,10 @@ class errorHandler extends Error {
     ) {
         super(message)
         this.statusCode = statusCode;
-        this.data = null;
+        this.response = null;
         this.message = message;
         this.success = false;
-        this.errors = errors
+        this.errors = message
 
 
         if (stack) {
