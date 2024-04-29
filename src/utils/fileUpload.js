@@ -5,21 +5,29 @@ const fs = require("fs");
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
 });
 
 
 const uploadToCloudinary = async (localFilePath, resourceType) => {
+    console.log("cloud_name ::: api_key ::: api_secret-------", process.env.CLOUDINARY_CLOUD_NAME, process.env.CLOUDINARY_API_KEY, process.env.CLOUDINARY_API_SECRET);
+    console.log("localpaththththth-------", localFilePath);
+    console.log("resourcetypepepep-------", resourceType);
 
     try {
         if (!localFilePath) {
             return null
         }
 
-        const response = await cloudinary.uploader.upload(localFilePath, { resource_type: resourceType })
+        console.log("before cloudinary response-------");
+        const response = await cloudinary.uploader.upload(localFilePath, { resource_type: resourceType });
+        console.log("after cloudinary response-------");
+
         fs.unlinkSync(localFilePath);
         return response;
     } catch (error) {
+        console.log("catch part ::::: cloudinary response-------", error);
         fs.unlinkSync(localFilePath);
         return null;
     }

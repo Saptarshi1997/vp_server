@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const userRouter = require("../src/routes/user.routes");
+const videoRouter = require("../src/routes/video.routes");
 
 const app = express();
 
@@ -24,5 +25,6 @@ app.use(express.static("public"));
 app.use(cookieParser())
 
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/videos", videoRouter);
 
 module.exports = app;
