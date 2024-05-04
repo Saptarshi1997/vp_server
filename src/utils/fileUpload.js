@@ -11,27 +11,67 @@ cloudinary.config({
 
 
 const uploadToCloudinary = async (localFilePath, resourceType) => {
-    console.log("cloud_name ::: api_key ::: api_secret-------", process.env.CLOUDINARY_CLOUD_NAME, process.env.CLOUDINARY_API_KEY, process.env.CLOUDINARY_API_SECRET);
-    console.log("localpaththththth-------", localFilePath);
-    console.log("resourcetypepepep-------", resourceType);
-
     try {
         if (!localFilePath) {
-            return null
+            return null;
         }
 
-        console.log("before cloudinary response-------");
-        const response = await cloudinary.uploader.upload(localFilePath, { resource_type: resourceType });
-        console.log("after cloudinary response-------");
+        // Define chunk size (in bytes)
+        const chunkSize = 5 * 1024 * 1024; // 5MB
 
+        // Open a read stream for the local file
+        const readStream = fs.createReadStream(localFilePath);
+
+        // Get the total file size
+        const stats = fs.statSync(localFilePath);
+        const totalFileSize = stats.size;
+
+        // Calculate the number of chunks
+        const numberOfChunks = Math.ceil(totalFileSize / chunkSize);
+
+        console.log("Total file size:", totalFileSize);
+        console.log("Number of chunks:", numberOfChunks);
+
+        // Upload options
+        const options = {
+            resource_type: resourceType,
+            chunk_size: chunkSize,
+            // eager: [{ width: 500, height: 500, crop: 'pad' }] // Optional, adjust as needed
+        };
+
+        // Perform the streaming upload
+        let currentChunk = 1;
+        readStream.on('data', (chunk) => {
+            console.log(`Chunk ${currentChunk} size: ${chunk.length}`);
+            currentChunk++;
+        });
+
+        const response = await new Promise((resolve, reject) => {
+            readStream.pipe(
+                cloudinary.uploader.upload_stream(options, (error, result) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        console.log("result=-------+++++++", result)
+                        resolve(result);
+                    }
+                })
+            );
+        });
+
+        console.log("Response:", response);
+
+        // Remove the local file after upload
         fs.unlinkSync(localFilePath);
+
         return response;
     } catch (error) {
-        console.log("catch part ::::: cloudinary response-------", error);
+        // Handle errors and cleanup
         fs.unlinkSync(localFilePath);
+        console.error('Upload error:', error);
         return null;
     }
-}
+};
 
 const deleteFileFromCloudinary = async (url, isVideo) => {
     try {

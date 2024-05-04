@@ -5,9 +5,12 @@ const errorHandler = require("../utils/errorHandler");
 
 
 
-const verifyJWT = asyncHandler(async (req, _, next) => {
+const verifyJWT = asyncHandler(async (req, res, next) => {
     try {
+        console.log("accessToken::::=====beforeeee>>>", req);
+
         const accessToken = req.cookies.accessToken || req.header("Authorization")?.replace("Bearer ", "");
+        console.log("accessToken::::=====", accessToken);
 
         if (!accessToken) {
             return res.json(new responseHandler(400, {}, "Unauthorized token!"))
